@@ -11,5 +11,7 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# Local data downloads / caches
-data/
+# Local data downloads / caches (keep lightweight artifacts)
+data/*
+!data/.gitkeep
+!data/*.npz
