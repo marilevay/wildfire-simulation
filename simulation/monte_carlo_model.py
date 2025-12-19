@@ -8,14 +8,12 @@ import numpy as np
 from .data_collector import DataCollector
 from .forest import Forest
 
-
 @dataclass(frozen=True)
 class MonteCarloSummary:
     """Arrays of outcomes from repeated Monte Carlo wildfire simulations.
 
     Each element corresponds to one stochastic simulation run.
     """
-
     burned_fraction: np.ndarray
     affected_fraction: np.ndarray
 
@@ -26,7 +24,6 @@ class FireModelParams:
     The spread probability is computed from destination density (optionally nonlinearly) and then
     biased by wind alignment.
     """
-
     wind: Tuple[float, float] = (0.0, 0.0)
     wind_strength: float = 0.0
     density_exponent: float = 1.0
@@ -46,7 +43,7 @@ class MonteCarlo:
     def __init__(self, forest: Forest, params: FireModelParams, n_runs: int, rng: Optional[np.random.Generator] = None):
         """Create a Monte Carlo runner.
 
-        If `rng` is not provided, a new NumPy default RNG is created.
+        If rng is not provided, a new NumPy default RNG is created.
         """
         if n_runs <= 0:
             raise ValueError("n_runs must be positive")
@@ -57,7 +54,7 @@ class MonteCarlo:
         self.random_generator = rng if rng is not None else np.random.default_rng()
 
     def run(self) -> DataCollector:
-        """Run `n_runs` simulations and return per-run burned/affected fractions."""
+        """Run n_runs simulations and return per-run burned/affected fractions."""
         collector = DataCollector()
         total_cells = float(self.forest.density.size)
         
@@ -71,7 +68,7 @@ class MonteCarlo:
         ignition_probs = ignition_weights.ravel() / weight_sum if weight_sum > 0 else None
 
         for _ in range(int(self.n_runs)):
-            # One stochastic fire realization.
+            # One stochastic fire realization
             burned_mask = self._simulate_fire_optimized(
                 density=density, 
                 spread_map=spread_map, 
@@ -85,7 +82,7 @@ class MonteCarlo:
         return collector
 
     def risk_map(self, n_runs: Optional[int] = None) -> np.ndarray:
-        """Estimate per-cell probability of being affected (burned or adjacent)."""
+        """Estimate per-cell probability of being affected (burned or adjacent)"""
         runs = self.n_runs if n_runs is None else int(n_runs)
         if runs <= 0:
             raise ValueError("n_runs must be positive")
@@ -113,7 +110,7 @@ class MonteCarlo:
         return affected_counts / float(runs)
 
     def _neighbors(self, i: int, j: int, nrows: int, ncols: int):
-        """Yield neighbor coordinates using Moore (8-neighbor) connectivity."""
+        """Yield neighbor coordinates using Moore (8-neighbor) connectivity"""
         for di in (-1, 0, 1):
             for dj in (-1, 0, 1):
                 if di == 0 and dj == 0:
@@ -124,7 +121,7 @@ class MonteCarlo:
 
     def _precompute_spread_dynamics(self, density: np.ndarray) -> Tuple[np.ndarray, dict]:
         """Precompute base spread maps and wind factors."""
-        # Base spread increases with destination fuel density.
+        # Base spread increases with destination fuel density
         density_clamped = np.clip(density, 0.0, 1.0)
         spread_map = float(self.params.base_spread) * (density_clamped ** float(self.params.density_exponent))
         
@@ -151,8 +148,8 @@ class MonteCarlo:
         return spread_map, wind_factors
 
     def _spread_probability(self, density_to: float, delta: Tuple[int, int]) -> float:
-        """Probability of spreading from a burning cell to a neighbor cell (legacy method)."""
-        # Kept for backward compatibility if needed, but core logic is now precomputed.
+        """Probability of spreading from a burning cell to a neighbor cell (legacy method)"""
+        # Kept for backward compatibility if needed, but core logic is now precomputed
         if density_to <= 0.0:
             return 0.0
 
@@ -171,7 +168,7 @@ class MonteCarlo:
         return float(np.clip(spread_probability, 0.0, 1.0))
 
     def _simulate_fire_optimized(self, density: np.ndarray, spread_map: np.ndarray, wind_factors: dict, ignition_probs: Optional[np.ndarray]) -> np.ndarray:
-        """Simulate one fire event using precomputed probability maps."""
+        """Simulate one fire event using precomputed probability maps"""
         nrows, ncols = density.shape
         burned_mask = np.zeros((nrows, ncols), dtype=bool)
         
@@ -256,7 +253,7 @@ class MonteCarlo:
     def _adjacent_mask(self, burned: np.ndarray) -> np.ndarray:
         """Return a boolean mask of cells that are burned or adjacent to burned.
         
-        Optimized with NumPy vectorization (bitwise OR shifts).
+        Optimized with NumPy vectorization (bitwise OR shifts)
         """
         rows, cols = burned.shape
         # Start with the burned cells themselves
