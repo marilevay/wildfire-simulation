@@ -58,16 +58,13 @@ The core logic is organized in the `simulation/` package:
 ```
 .
 ├── data/                       # Cached simulation data
-├── report/                     # LaTeX project report sources
 ├── simulation/                 # Core Python simulation package
 │   ├── __init__.py
 │   ├── data_collector.py
 │   ├── forest.py
 │   └── monte_carlo_model.py
 ├── cs166-final-project.pdf     # Final PDF report
-├── tests.ipynb                 # Sanity checks and unit tests
 ├── wildfire-visualization.ipynb # Main analysis notebook
-├── pyproject.toml              # Build configuration
 ├── requirements.txt            # Python dependencies
 └── README.md
 ```
@@ -88,3 +85,4 @@ The model assumes that fire spread is a percolation process. For a cell with den
 ## License
 
 See the `LICENSE` file for further details.
+
